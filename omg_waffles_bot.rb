@@ -5,6 +5,10 @@ require 'twitter'
 # A Ruby script written by Gavin Kendall (@gavinmkendall)
 #
 # ===========================================================================
+# Version 1.2 (October 4, 2015)
+# Increased sleep time. Improved console output to display tweet message
+# being responded to.
+#
 # Version 1.1 (October 4, 2015)
 # Now it continually searches for the most recent tweet with the phrase
 # "i want waffles", sleeps for 30 seconds, and then tries again.
@@ -73,12 +77,13 @@ if File.file?("keys")
 	# Use the Twitter API to continually search for the most recent tweet that contains the exact phrase "i want waffles".
 	while 1 == 1
 		puts "Looking for people to give waffles to ..."
+
 		client.search("\"i want waffles\"").take(1).each do |tweet|
 			if !users.include?("%s\n" % tweet.user.screen_name) # Make sure we haven't responded to this user yet
 
 				# Respond to the user with "*gives you waffles"
 				client.update("@%s %s" % [tweet.user.screen_name, "*gives you waffles"])
-				puts "I found someone! I've given waffles to @%s (%s)" % [tweet.user.screen_name, tweet.user.name]
+				puts "I found someone! I've given waffles to @%s (%s) because they said \"%s\"" % [tweet.user.screen_name, tweet.user.name, tweet.text]
 			
 				# Write the user's tweet's created date, username (screen name), display name, and tweet message to the log file
 				open("log.txt", "a") do |outfile|
@@ -92,14 +97,14 @@ if File.file?("keys")
 
 				# Add the user to the user array so we know to ignore them on the next iteration
 				# while we're looping through the tweets of those who have clearly wanted waffles
-				users.push(tweet.user.screen_name)
+				users.push("%s\n" % tweet.user.screen_name)
 			else
 				puts "I've already replied to @%s (%s)" % [tweet.user.screen_name, tweet.user.name]
 			end
-
-			puts "Sleeping for a few seconds before trying again ..." # Let's be nice to Twitter and rest for a few seconds
-			sleep 30
 		end
+
+		puts "Sleeping for a minute before trying again ..." # Let's be nice to Twitter
+		sleep 60
 	end
 else
 	puts "I couldn't find the keys file to import your Twitter API keys and tokens"
