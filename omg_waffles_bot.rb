@@ -5,6 +5,10 @@ require 'twitter'
 # A Ruby script written by Gavin Kendall (@gavinmkendall)
 #
 # ===========================================================================
+# Version 1.3 (October 4, 2015)
+# Included sleep timeout when posting updates. Also ignoring any tweets that
+# are obviously replies to other people and retweets.
+#
 # Version 1.2 (October 4, 2015)
 # Increased sleep time. Improved console output to display tweet message
 # being responded to.
@@ -74,37 +78,43 @@ if File.file?("keys")
 		end
 	end
 
-	# Use the Twitter API to continually search for the most recent tweet that contains the exact phrase "i want waffles".
+	# Use the Twitter API to continually search for tweets that contain the exact phrase "i want waffles".
 	while 1 == 1
-		puts "Looking for people to give waffles to ..."
+		puts "Searching for people to give waffles to ..."
 
-		client.search("\"i want waffles\"").take(1).each do |tweet|
+		client.search("\"i want waffles\"").take(50).each do |tweet|
 			if !users.include?("%s\n" % tweet.user.screen_name) # Make sure we haven't responded to this user yet
 
-				# Respond to the user with "*gives you waffles"
-				client.update("@%s %s" % [tweet.user.screen_name, "*gives you waffles"])
-				puts "I found someone! I've given waffles to @%s (%s) because they said \"%s\"" % [tweet.user.screen_name, tweet.user.name, tweet.text]
-			
-				# Write the user's tweet's created date, username (screen name), display name, and tweet message to the log file
-				open("log.txt", "a") do |outfile|
-					outfile.puts "%s @%s (%s) %s" % [tweet.created_at, tweet.user.screen_name, tweet.user.name, tweet.text]
-				end
-			
-				# Write the user's screen name to the userlist file so we don't bother them whenever this script is executed
-				open("userlist", "a") do |outfile|
-					outfile.puts tweet.user.screen_name
-				end
+				if !tweet.text.start_with?("@") and !tweet.text.start_with?("RT") # Make sure we don't respond to tweets that are replies or retweets
 
-				# Add the user to the user array so we know to ignore them on the next iteration
-				# while we're looping through the tweets of those who have clearly wanted waffles
-				users.push("%s\n" % tweet.user.screen_name)
+					# Respond to the user with "*gives you waffles"
+					client.update("@%s %s" % [tweet.user.screen_name, "*gives you waffles"])
+					puts "I found someone! I've given waffles to @%s (%s) because they said \"%s\"" % [tweet.user.screen_name, tweet.user.name, tweet.text]
+			
+					# Write the user's tweet's created date, username (screen name), display name, and tweet message to the log file
+					open("log.txt", "a") do |outfile|
+						outfile.puts "%s @%s (%s) %s" % [tweet.created_at, tweet.user.screen_name, tweet.user.name, tweet.text]
+					end
+			
+					# Write the user's screen name to the userlist file so we don't bother them whenever this script is executed
+					open("userlist", "a") do |outfile|
+						outfile.puts tweet.user.screen_name
+					end
+
+					# Add the user to the user array so we know to ignore them on the next iteration
+					# while we're looping through the tweets of those who have clearly wanted waffles
+					users.push("%s\n" % tweet.user.screen_name)
+
+					# Sleep before making another update
+					sleep 600
+				end
 			else
-				puts "I've already replied to @%s (%s)" % [tweet.user.screen_name, tweet.user.name]
+				puts "I've already given waffles to %s (%s)" % [tweet.user.screen_name, tweet.user.name]
 			end
 		end
 
-		puts "Sleeping for a minute before trying again ..." # Let's be nice to Twitter
-		sleep 60
+		puts "Sleeping before searching again ..." # Let's be nice to Twitter
+		sleep 1800
 	end
 else
 	puts "I couldn't find the keys file to import your Twitter API keys and tokens"
