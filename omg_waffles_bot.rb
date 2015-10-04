@@ -5,6 +5,10 @@ require 'twitter'
 # A Ruby script written by Gavin Kendall (@gavinmkendall)
 #
 # ===========================================================================
+# Version 1.1 (October 4, 2015)
+# Now it continually searches for the most recent tweet with the phrase
+# "i want waffles", sleeps for 30 seconds, and then tries again.
+#
 # Version 1.0 (October 4, 2015)
 # Finds anyone on Twitter tweeting the exact phrase "i want waffles"
 # and responds to that particular user with "*gives you waffles".
@@ -66,30 +70,35 @@ if File.file?("keys")
 		end
 	end
 
-	# Use the Twitter API to search for 10 of the most recent tweets that contain the exact phrase "i want waffles".
-	puts "Looking for people to give waffles to ..."
-	client.search("\"i want waffles\"").take(10).each do |tweet|
-		if !users.include?("%s\n" % tweet.user.screen_name) # Make sure we haven't responded to this user yet
+	# Use the Twitter API to continually search for the most recent tweet that contains the exact phrase "i want waffles".
+	while 1 == 1
+		puts "Looking for people to give waffles to ..."
+		client.search("\"i want waffles\"").take(1).each do |tweet|
+			if !users.include?("%s\n" % tweet.user.screen_name) # Make sure we haven't responded to this user yet
 
-			# Respond to the user with "*gives you waffles"
-			client.update("@%s %s" % [tweet.user.screen_name, "*gives you waffles"])
-			puts "I found someone! I've given waffles to @%s (%s)" % [tweet.user.screen_name, tweet.user.name]
+				# Respond to the user with "*gives you waffles"
+				client.update("@%s %s" % [tweet.user.screen_name, "*gives you waffles"])
+				puts "I found someone! I've given waffles to @%s (%s)" % [tweet.user.screen_name, tweet.user.name]
 			
-			# Write the user's tweet's created date, username (screen name), display name, and tweet message to the log file
-			open("log.txt", "a") do |outfile|
-				outfile.puts "%s @%s (%s) %s" % [tweet.created_at, tweet.user.screen_name, tweet.user.name, tweet.text]
-			end
+				# Write the user's tweet's created date, username (screen name), display name, and tweet message to the log file
+				open("log.txt", "a") do |outfile|
+					outfile.puts "%s @%s (%s) %s" % [tweet.created_at, tweet.user.screen_name, tweet.user.name, tweet.text]
+				end
 			
-			# Write the user's screen name to the userlist file so we don't bother them whenever this script is executed
-			open("userlist", "a") do |outfile|
-				outfile.puts tweet.user.screen_name
+				# Write the user's screen name to the userlist file so we don't bother them whenever this script is executed
+				open("userlist", "a") do |outfile|
+					outfile.puts tweet.user.screen_name
+				end
+
+				# Add the user to the user array so we know to ignore them on the next iteration
+				# while we're looping through the tweets of those who have clearly wanted waffles
+				users.push(tweet.user.screen_name)
+			else
+				puts "I've already replied to @%s (%s)" % [tweet.user.screen_name, tweet.user.name]
 			end
 
-			# Add the user to the user array so we know to ignore them on the next iteration
-			# while we're looping through the tweets of those who have clearly wanted waffles
-			users.push(tweet.user.screen_name)
-		else
-			puts "I've already replied to @%s (%s)" % [tweet.user.screen_name, tweet.user.name]
+			puts "Sleeping for a few seconds before trying again ..." # Let's be nice to Twitter and rest for a few seconds
+			sleep 30
 		end
 	end
 else
