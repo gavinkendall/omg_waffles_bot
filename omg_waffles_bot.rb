@@ -5,6 +5,9 @@ require 'twitter'
 # A Ruby script written by Gavin Kendall (@gavinmkendall)
 #
 # ===========================================================================
+# Version 1.5 (October 5, 2015)
+# Decreased search criteria range.
+#
 # Version 1.4 (October 4, 2015)
 # Added exception handling.
 #
@@ -86,7 +89,7 @@ if File.file?("keys")
 		begin
 			puts "Searching for people who want waffles ..."
 
-			client.search("\"i want waffles\"").take(50).each do |tweet|
+			client.search("\"i want waffles\"").take(10).each do |tweet|
 				if !users.include?("%s\n" % tweet.user.screen_name) # Make sure we haven't responded to this user yet
 
 					if !tweet.text.start_with?("@") and !tweet.text.start_with?("RT") # Make sure we don't respond to tweets that are replies or retweets
