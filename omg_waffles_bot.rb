@@ -5,6 +5,9 @@ require 'twitter'
 # A Ruby script written by Gavin Kendall (@gavinmkendall)
 #
 # ===========================================================================
+# Version 1.4 (October 4, 2015)
+# Added exception handling.
+#
 # Version 1.3 (October 4, 2015)
 # Included sleep timeout when posting updates. Also ignoring any tweets that
 # are obviously replies to other people and retweets.
@@ -80,41 +83,49 @@ if File.file?("keys")
 
 	# Use the Twitter API to continually search for tweets that contain the exact phrase "i want waffles".
 	while 1 == 1
-		puts "Searching for people to give waffles to ..."
+		begin
+			puts "Searching for people who want waffles ..."
 
-		client.search("\"i want waffles\"").take(50).each do |tweet|
-			if !users.include?("%s\n" % tweet.user.screen_name) # Make sure we haven't responded to this user yet
+			client.search("\"i want waffles\"").take(50).each do |tweet|
+				if !users.include?("%s\n" % tweet.user.screen_name) # Make sure we haven't responded to this user yet
 
-				if !tweet.text.start_with?("@") and !tweet.text.start_with?("RT") # Make sure we don't respond to tweets that are replies or retweets
+					if !tweet.text.start_with?("@") and !tweet.text.start_with?("RT") # Make sure we don't respond to tweets that are replies or retweets
 
-					# Respond to the user with "*gives you waffles"
-					client.update("@%s %s" % [tweet.user.screen_name, "*gives you waffles"])
-					puts "I found someone! I've given waffles to @%s (%s) because they said \"%s\"" % [tweet.user.screen_name, tweet.user.name, tweet.text]
+						# Respond to the user with "*gives you waffles"
+						client.update("@%s %s" % [tweet.user.screen_name, "*gives you waffles"])
+
+						puts "I found someone! I've given waffles to @%s (%s) because they said \"%s\"" % [tweet.user.screen_name, tweet.user.name, tweet.text]
 			
-					# Write the user's tweet's created date, username (screen name), display name, and tweet message to the log file
-					open("log.txt", "a") do |outfile|
-						outfile.puts "%s @%s (%s) %s" % [tweet.created_at, tweet.user.screen_name, tweet.user.name, tweet.text]
-					end
+						# Write the user's tweet's created date, username (screen name), display name, and tweet message to the log file
+						open("log.txt", "a") do |outfile|
+							outfile.puts "%s @%s (%s) %s" % [tweet.created_at, tweet.user.screen_name, tweet.user.name, tweet.text]
+						end
 			
-					# Write the user's screen name to the userlist file so we don't bother them whenever this script is executed
-					open("userlist", "a") do |outfile|
-						outfile.puts tweet.user.screen_name
+						# Write the user's screen name to the userlist file so we don't bother them whenever this script is executed
+						open("userlist", "a") do |outfile|
+							outfile.puts tweet.user.screen_name
+						end
+
+						# Add the user to the user array so we know to ignore them on the next iteration
+						# while we're looping through the tweets of those who have clearly wanted waffles
+						users.push("%s\n" % tweet.user.screen_name)
+
+						# Sleep for 10 minutes before (potentially) making another update
+						# otherwise we're going to be restricted by Twitter in writing tweets to people (and we don't want that)
+						puts "Sleeping for ten minutes since last tweet response ..."
+						sleep 600
 					end
-
-					# Add the user to the user array so we know to ignore them on the next iteration
-					# while we're looping through the tweets of those who have clearly wanted waffles
-					users.push("%s\n" % tweet.user.screen_name)
-
-					# Sleep before making another update
-					sleep 600
+				else
+					puts "I've already given waffles to %s (%s)" % [tweet.user.screen_name, tweet.user.name]
 				end
-			else
-				puts "I've already given waffles to %s (%s)" % [tweet.user.screen_name, tweet.user.name]
 			end
-		end
 
-		puts "Sleeping before searching again ..." # Let's be nice to Twitter
-		sleep 1800
+			puts "Sleeping for half an hour before searching again ..."
+			sleep 1800 # Sleep for 30 minutes before we search again. Let's be nice to Twitter
+		rescue
+			puts "An error occurred. Sleeping for a couple of minutes before searching again ..."
+			sleep 120
+		end
 	end
 else
 	puts "I couldn't find the keys file to import your Twitter API keys and tokens"
