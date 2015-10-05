@@ -5,6 +5,9 @@ require 'twitter'
 # A Ruby script written by Gavin Kendall (@gavinmkendall)
 #
 # ===========================================================================
+# Version 1.6 (October 5, 2015)
+# Timing and search range adjustments.
+#
 # Version 1.5 (October 5, 2015)
 # Decreased search criteria range.
 #
@@ -89,7 +92,7 @@ if File.file?("keys")
 		begin
 			puts "Searching for people who want waffles ..."
 
-			client.search("\"i want waffles\"").take(10).each do |tweet|
+			client.search("\"i want waffles\"").take(1).each do |tweet|
 				if !users.include?("%s\n" % tweet.user.screen_name) # Make sure we haven't responded to this user yet
 
 					if !tweet.text.start_with?("@") and !tweet.text.start_with?("RT") # Make sure we don't respond to tweets that are replies or retweets
@@ -112,19 +115,14 @@ if File.file?("keys")
 						# Add the user to the user array so we know to ignore them on the next iteration
 						# while we're looping through the tweets of those who have clearly wanted waffles
 						users.push("%s\n" % tweet.user.screen_name)
-
-						# Sleep for 10 minutes before (potentially) making another update
-						# otherwise we're going to be restricted by Twitter in writing tweets to people (and we don't want that)
-						puts "Sleeping for ten minutes since last tweet response ..."
-						sleep 600
 					end
 				else
 					puts "I've already given waffles to %s (%s)" % [tweet.user.screen_name, tweet.user.name]
 				end
 			end
 
-			puts "Sleeping for half an hour before searching again ..."
-			sleep 1800 # Sleep for 30 minutes before we search again. Let's be nice to Twitter
+			puts "Sleeping for an hour before searching again ..."
+			sleep 3600 # Sleep for 60 minutes before we search again. Let's be nice to Twitter
 		rescue
 			puts "An error occurred. Sleeping for a couple of minutes before searching again ..."
 			sleep 120
