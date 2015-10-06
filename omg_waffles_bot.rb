@@ -5,6 +5,9 @@ require 'twitter'
 # A Ruby script written by Gavin Kendall (@gavinmkendall)
 #
 # ===========================================================================
+# Version 1.7 (October 6, 2015)
+# Added message explaining why a tweet couldn't be responded to.
+#
 # Version 1.6 (October 5, 2015)
 # Timing and search range adjustments.
 #
@@ -115,6 +118,8 @@ if File.file?("keys")
 						# Add the user to the user array so we know to ignore them on the next iteration
 						# while we're looping through the tweets of those who have clearly wanted waffles
 						users.push("%s\n" % tweet.user.screen_name)
+					else
+						puts "Sorry. I can't respond to this tweet because it's either a reply or a retweet - \"%s" % [tweet.text]
 					end
 				else
 					puts "I've already given waffles to %s (%s)" % [tweet.user.screen_name, tweet.user.name]
