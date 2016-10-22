@@ -2,9 +2,14 @@
 require 'twitter'
 
 # OMG Waffles Bot (http://twitter.com/omg_waffles)
-# A Ruby script written by Gavin Kendall (@gavinmkendall)
+# A Ruby script written by Gavin Kendall (@Gavin2Go)
 #
 # ===========================================================================
+# Version 1.8 (October 22, 2016)
+# Now reads in a random waffle fact from a text file and sends that waffle
+# fact to a particular Twitter user. (And I can't believe it's been a year
+# since this thing was updated!).
+#
 # Version 1.7 (October 6, 2015)
 # Added message explaining why a tweet couldn't be responded to.
 #
@@ -36,10 +41,15 @@ require 'twitter'
 # ===========================================================================
 
 # This Ruby script was written using the vim editor on a Linux Mint system.
-# It needs the Twitter API to be installed (as well as Ruby and g++).
-# To get the Twitter API libraries onto your Linux system you'll
+# It needs the Twitter API to be installed (as well as Ruby and gcc).
+# To get the Twitter API libraries onto your Ubuntu Linux system you'll
 # need to run the following command from a Terminal:
-# sudo gem install twitter --include-dependencies
+# sudo gem install twitter -include-dependencies
+
+# If you're missing the development tools on your Ubuntu Linux system
+# then run these commands from a Terminal:
+# sudo apt-get install build-essential
+# sudo apt-get install ruby-all-dev
 
 
 # Read in the keys that will be used with the Twitter API.
@@ -90,9 +100,20 @@ if File.file?("keys")
 		end
 	end
 
+	# Loads in a series of waffle facts from the "waffle_facts.txt" text file. These facts are stored in an array.
+	facts = Array.new
+	File.open("waffle_facts.txt", "r") do |infile|
+		infile.each_line do |line|
+			facts.push line.chomp
+		end
+	end
+
 	# Use the Twitter API to continually search for tweets that contain the exact phrase "i want waffles".
 	while 1 == 1
 		begin
+			puts "Sending a random waffle fact to someone ..."
+			client.update("@%s %s <3" % ["Gavin2Go", facts.sample(1)])
+
 			puts "Searching for people who want waffles ..."
 
 			client.search("\"i want waffles\"").take(1).each do |tweet|
