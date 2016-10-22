@@ -7,5 +7,6 @@ sudo apt-get install build-essential
 
 sudo apt-get install ruby-all-dev
 
-sudo gem install twitter --include-dependencies
+sudo gem install twitter -include-dependencies
 
+These commands can be run from a Terminal window in modern Ubuntu Linux operating systems (such as Linux Mint).
