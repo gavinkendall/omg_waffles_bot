@@ -5,6 +5,11 @@ require 'twitter'
 # A Ruby script written by Gavin Kendall (@Gavin2Go)
 #
 # ===========================================================================
+# Version 1.9 (October 23, 2016)
+# Logs error messages to an "error.txt" text file. Now posts a waffle fact
+# on its feed if it can't respond with a "* gives you waffles" message to a user.
+# Adjusted how long it sleeps before searching again. Now 30 minutes instead of 60.
+#
 # Version 1.8 (October 22, 2016)
 # Now reads in a random waffle fact from a text file and sends that waffle
 # fact to a particular Twitter user. (And I can't believe it's been a year
@@ -113,7 +118,6 @@ if File.file?("keys")
 		begin
 			puts "Sending a random waffle fact to someone ..."
 			client.update("@%s %s <3" % ["Gavin2Go", facts.sample(1)])
-
 			puts "Searching for people who want waffles ..."
 
 			client.search("\"i want waffles\"").take(1).each do |tweet|
@@ -141,17 +145,27 @@ if File.file?("keys")
 						users.push("%s\n" % tweet.user.screen_name)
 					else
 						puts "Sorry. I can't respond to this tweet because it's either a reply or a retweet - \"%s" % [tweet.text]
+						puts "I'll post a random waffle fact instead"
+						client.update("%s" % [facts.sample(1)])
 					end
 				else
 					puts "I've already given waffles to %s (%s)" % [tweet.user.screen_name, tweet.user.name]
 				end
 			end
 
-			puts "Sleeping for an hour before searching again ..."
-			sleep 3600 # Sleep for 60 minutes before we search again. Let's be nice to Twitter
-		rescue
-			puts "An error occurred. Sleeping for a couple of minutes before searching again ..."
-			sleep 120
+			puts "Sleeping for 30 minutes before searching again ..."
+			sleep 1800 # Sleep for 30 minutes before we search again. Let's be nice to Twitter
+		rescue Exception => e
+			open("error.txt", "a") do |outfile|
+				outfile.puts e.message
+				outfile.puts e.backtrace.inspect
+			end
+
+			puts "An error occurred. Sleeping for 30 minutes before searching again ..."
+			puts e.message
+			puts e.backtrace.inspect
+
+			sleep 1800 
 		end
 	end
 else
