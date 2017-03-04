@@ -5,6 +5,10 @@ require 'twitter'
 # A Ruby script written by Gavin Kendall (@Gavin2Go)
 #
 # ===========================================================================
+# Version 1.10 (March 4, 2017)
+# Removed ability to send a random waffle fact to a particular user. Also increased
+# how long the script sleeps before starting the next search.
+#
 # Version 1.9 (October 23, 2016)
 # Logs error messages to an "error.txt" text file. Now posts a waffle fact
 # on its feed if it can't respond with a "* gives you waffles" message to a user.
@@ -116,8 +120,6 @@ if File.file?("keys")
 	# Use the Twitter API to continually search for tweets that contain the exact phrase "i want waffles".
 	while 1 == 1
 		begin
-			puts "Sending a random waffle fact to someone ..."
-			client.update("@%s %s <3" % ["Gavin2Go", facts.sample(1)])
 			puts "Searching for people who want waffles ..."
 
 			client.search("\"i want waffles\"").take(1).each do |tweet|
@@ -153,8 +155,7 @@ if File.file?("keys")
 				end
 			end
 
-			puts "Sleeping for 30 minutes before searching again ..."
-			sleep 1800 # Sleep for 30 minutes before we search again. Let's be nice to Twitter
+			sleep 7200 # Sleep for a while before we search again. Let's be nice to Twitter
 		rescue Exception => e
 			open("error.txt", "a") do |outfile|
 				outfile.puts e.message
