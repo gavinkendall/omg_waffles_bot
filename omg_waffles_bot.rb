@@ -6,8 +6,9 @@ require 'twitter'
 #
 # ===========================================================================
 # Version 1.10 (March 4, 2017)
-# Removed ability to send a random waffle fact to a particular user. Also increased
-# how long the script sleeps before starting the next search.
+# Removed ability to send a random waffle fact to a particular user.
+# Increased how long the script sleeps before starting the next search.
+# Now replies to the individual tweet and logs the tweet id of the recipient.  
 #
 # Version 1.9 (October 23, 2016)
 # Logs error messages to an "error.txt" text file. Now posts a waffle fact
@@ -128,13 +129,13 @@ if File.file?("keys")
 					if !tweet.text.start_with?("@") and !tweet.text.start_with?("RT") # Make sure we don't respond to tweets that are replies or retweets
 
 						# Respond to the user with "*gives you waffles"
-						client.update("@%s %s" % [tweet.user.screen_name, "*gives you waffles"])
+						client.update("@%s %s" % [tweet.user.screen_name, "*gives you waffles"], in_reply_to_status_id: tweet.id)
 
 						puts "I found someone! I've given waffles to @%s (%s) because they said \"%s\"" % [tweet.user.screen_name, tweet.user.name, tweet.text]
 			
 						# Write the user's tweet's created date, username (screen name), display name, and tweet message to the log file
 						open("log.txt", "a") do |outfile|
-							outfile.puts "%s @%s (%s) %s" % [tweet.created_at, tweet.user.screen_name, tweet.user.name, tweet.text]
+							outfile.puts "%s %s @%s (%s) %s" % [tweet.created_at, tweet.id, tweet.user.screen_name, tweet.user.name, tweet.text]
 						end
 			
 						# Write the user's screen name to the userlist file so we don't bother them whenever this script is executed
