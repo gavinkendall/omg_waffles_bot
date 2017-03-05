@@ -5,6 +5,9 @@ require 'twitter'
 # A Ruby script written by Gavin Kendall (@Gavin2Go)
 #
 # ===========================================================================
+# Version 1.11 (March 5, 2017)
+# Clean up of waffle fact output.
+#
 # Version 1.10 (March 4, 2017)
 # Removed ability to send a random waffle fact to a particular user.
 # Increased how long the script sleeps before starting the next search.
@@ -149,7 +152,7 @@ if File.file?("keys")
 					else
 						puts "Sorry. I can't respond to this tweet because it's either a reply or a retweet - \"%s" % [tweet.text]
 						puts "I'll post a random waffle fact instead"
-						client.update("%s" % [facts.sample(1)])
+						client.update("%s" % [facts.sample])
 					end
 				else
 					puts "I've already given waffles to %s (%s)" % [tweet.user.screen_name, tweet.user.name]
