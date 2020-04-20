@@ -3,10 +3,12 @@ Finds anyone on Twitter tweeting the exact phrase "i want waffles" and responds 
 
 You may need to run the following commands in order to get this script running if you don't have gcc, ruby, and/or twitter already installed:
 
-sudo apt-get install build-essential
+apt-get install build-essential
 
-sudo apt-get install ruby-all-dev
+apt-get install ruby-all-dev
 
-sudo gem install twitter -include-dependencies
+gem install rake
+
+gem install twitter
 
 These commands can be run from a Terminal window in modern Ubuntu Linux operating systems (such as Linux Mint).
