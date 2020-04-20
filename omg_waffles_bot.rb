@@ -5,6 +5,9 @@ require 'twitter'
 # A Ruby script written by Gavin Kendall (@Gavin2Go)
 #
 # ===========================================================================
+# Version 1.12 (April 20, 2020)
+# Update to instructions on how to install the Twitter gem for Ruby.
+#
 # Version 1.11 (March 5, 2017)
 # Clean up of waffle fact output.
 #
@@ -57,7 +60,8 @@ require 'twitter'
 # It needs the Twitter API to be installed (as well as Ruby and gcc).
 # To get the Twitter API libraries onto your Ubuntu Linux system you'll
 # need to run the following command from a Terminal:
-# sudo gem install twitter -include-dependencies
+# sudo gem install rake
+# sudo gem install twitter
 
 # If you're missing the development tools on your Ubuntu Linux system
 # then run these commands from a Terminal:
